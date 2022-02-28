@@ -1,8 +1,11 @@
-# BOT-TONI
+# BOT-TONI  (em desenvolvimento...)
+
+Teste o meu Bot:
+https://discord.gg/322nMfzv
 
 <hr>
 
-<h1>Comandos:</h1><br>
+<h1>Comandos:</h1>
 <ul>
  <li>
   <h3>!mix:</h3>

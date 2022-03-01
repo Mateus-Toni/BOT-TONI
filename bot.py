@@ -1,3 +1,4 @@
+#MONTAR CAMPEONATOS AUTOMATICAMENTE
 import discord
 from discord.ext import commands, tasks
 from dotenv import load_dotenv
@@ -129,6 +130,23 @@ async def game_today():
       await channel.send(f"Hoje temos {c} jogos, às:")
       for game in games:
           await channel.send(f"{game['hora_inicio']}")
+    
+@bot.command("mira")
+async def mira(ctx):
+  miras = {
+        'Furia':{ 'Kscerato':'', 'Art':'', 'Saffee':'', 'Drop':'', 'Yuurih':''},
+        'Imperial':{ 'Fallen':'', 'Fer':'', 'Fnx':'', 'Vini':'', 'Boltz':''},
+        '00Nation':{ 'Coldzera':'', 'MalbsMD':'', 'T7Y':'', 'Leo_Drk':'', 'V$M':''},
+        'GODSENT': { 'Taco':'', 'Latto':'', 'Felps':'', 'Dumau':'', 'B4artin':''},
+        'paiN Gaming': { 'PKL':'', 'Hardzao':'', 'Biguzera':'', 'Nython':'', 'Nekiz':''},
+        'Team One': { 'Maluk3':'', 'TRK':'', 'Pesadelo':'', 'XNS':'', 'Keiz':''},
+        'MIBR':{ 'chello':'', 'exit':'', 'WOOD7':'', 'Tuurtle':'', 'Jota':'' }
+        }
+  await ctx.send('Copie alugamas das Miras Brasileiras:')
+  for key, value in miras.items():
+    await ctx.send(key)
+    for player, crosshair in value.items():
+      await ctx.send(f"{player} -> {crosshair}")
     
 
 if __name__ == "__main__":

@@ -1,4 +1,5 @@
 
+from datetime import date
 import mysql.connector
 
 
@@ -26,7 +27,7 @@ def create_scheduling(date, hour):
         db.close()
         
         
-def delete_scheduling():
+def delete_schedule():
     db, cursor = open_db(USER, PASSWORD, HOST, NAME_DB)
     if db:
         cursor.execute("truncate table agenda_aberta;")
@@ -42,4 +43,21 @@ def return_schedule():
         db.close()
         return schedule
     
+def delete_scheduling(start_date):
+    db, cursor = open_db(USER, PASSWORD, HOST, NAME_DB)
+    if db:
+        cursor.execute(f"delete from agenda_aberta where data_inicio = '{start_date}';")
+        db.commit()
+        db.close()
+        
+def date_conversor(start_date):
+    from datetime import datetime
+    start_date = datetime.strptime(start_date.replace('/','-'), '%d-%m-%Y').date()
+    return start_date
+
+def date_us_to_br(date):
+    from datetime import datetime
     
+    date = datetime.strftime(date, '%d-%m-%Y')
+    print(date)
+

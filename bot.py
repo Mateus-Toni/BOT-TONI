@@ -1,4 +1,3 @@
-#MONTAR CAMPEONATOS AUTOMATICAMENTE
 import discord
 from discord.ext import commands, tasks
 from dotenv import load_dotenv
@@ -62,53 +61,71 @@ async def on_member_join(member):
 
 @bot.command(name='add_agenda')
 async def create_scheduling(ctx, date, hour):
-    dao.create_scheduling(date, hour)
+    convert_date = dao.date_conversor(date)
+    dao.create_scheduling(convert_date, hour)
     await ctx.send(f'agendamento criado dia {date} às {hour}')
     
 @bot.command(name='deletar_agenda')
 async def delete_schedule(ctx):
-    dao.delete_scheduling()
+    dao.delete_schedule()
     await ctx.send("Todos os agendamentos das ligas foram apagados")
 
 @bot.command(name='agenda')
 async def schedule(ctx):
-  c = 0
-  hour_game = []
-  import datetime
-  today = datetime.datetime.now()
-  hour = today.strftime('%H:%M')
-  date = today.strftime('%d/%m/%Y')
+  from datetime import datetime
+  next_match = not_have = have = 0
+  today = datetime.now().date()
   schedule = dao.return_schedule()
   if schedule:
+      next_game = []
+      today_game = []
       for dictionary in schedule:
-          if dictionary["data_inicio"] == date:
-              c += 1
-              hour_game.append(dictionary['hora_inicio'])
-  if c >= 1:
-    await ctx.send(f'Temos {c} jogo Hoje: \n' + '-'.join(hour_game))
+          if today < dictionary['data_inicio']:
+              next_game.append(dictionary)
+              next_match += 1
+          if today > dictionary['data_inicio']:
+              dao.delete_scheduling(dictionary['data_inicio'])
+          if today == dictionary['data_inicio']:
+              today_game.append(dictionary)
+              have += 1
+      
+                  
+      if have == 1:
+          for game in today_game:
+              print(f'temos um jogo hoje às {game["hora_inicio"]}') 
+              
+          if next_match == 1:
+              for games in next_game:
+                  print(f'e também temos um jogo dia {games["data_inicio"]} às {games["hora_inicio"]}')
+          elif next_match > 1:
+              print(f'e também temos jogos:')
+              for games in next_game:
+                  print(f'dia {games["data_inicio"]} às {games["hora_inicio"]}')
+      elif have > 1:
+          print(f'temos {have} jogos Hoje, são eles:')
+          for games in today_game:
+              print(f'{games["hora_inicio"]}')
+          
+          if next_match == 1:
+              for games in next_game:
+                  print(f'e também temos um jogo dia {games["data_inicio"]} às {games["hora_inicio"]}')
+          elif next_match > 1:
+              print(f'e também temos jogos:')
+              for games in next_game:
+                  print(f'dia {games["data_inicio"]} às {games["hora_inicio"]}')
+      else:
+          if next_game:
+              if next_match == 1:
+                  for games in next_game:
+                      print(f'Nosso próximo jogo é dia {games["data_inicio"]} às {games["hora_inicio"]}')
+              elif next_match > 1:
+                  print(f'Nossos próximos jogos estão marcados para:')
+                  for games in next_game:
+                      print(f'dia {games["data_inicio"]} às {games["hora_inicio"]}')
+          else:
+              print('Não temos jogos marcados para esta aberta')
   else:
-    next_games = []
-    if schedule:
-      for dictionary in schedule:
-
-        data = datetime.datetime.strptime(dictionary["data_inicio"], "%d/%m/%Y")
-
-        if data.day > today.day:
-          next_games.extend((dictionary['data_inicio'], dictionary['hora_inicio']))
-    if len(next_games) == 2:
-      if next_games:
-          await ctx.send(f"""Não temos jogo hoje, 
-                mas nosso próximo jogo é dia {next_games[0]} às {next_games[1]}""")
-    else:
-      await ctx.send("""Não temos jogo hoje, mas nosso próximos jogos são:""")
-      if schedule:
-          for dictionary in schedule:
-
-              data = datetime.datetime.strptime(dictionary["data_inicio"], "%d/%m/%Y")
-
-              if data.day > today.day:
-                  await ctx.send(f"dia {dictionary['data_inicio']} às {dictionary['hora_inicio']}")
-        
+      print('sem agendamentos')
 @tasks.loop(hours=6)
 async def game_today():
   import datetime
@@ -117,8 +134,8 @@ async def game_today():
   today = datetime.datetime.now()
   if schedule := dao.return_schedule():
     for dictionary in schedule:
-        data = datetime.datetime.strptime(dictionary["data_inicio"], "%d/%m/%Y")
-        if data.day == today.day:
+        data = datetime.datetime.strptime(dictionary["data_inicio"], "%Y/%m/%d")
+        if data == today:
             c+=1
             games.append(dictionary)
   channel = bot.get_channel(947305621047377931)
@@ -143,11 +160,10 @@ async def mira(ctx):
         'MIBR':{ 'chello':'', 'exit':'', 'WOOD7':'', 'Tuurtle':'', 'Jota':'' }
         }
   await ctx.send('Copie alugamas das Miras Brasileiras:')
-  for key, value in miras.items():
-    await ctx.send(key)
+  for value in miras.values():
     for player, crosshair in value.items():
       await ctx.send(f"{player} -> {crosshair}")
-    
+ 
 
 if __name__ == "__main__":
     load_dotenv()

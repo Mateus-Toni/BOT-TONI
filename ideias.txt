@@ -1,0 +1,6 @@
+== IDEIAS == 
+
+1. Automatizar os tramites de agenda com WebScraping
+2. Melhorar o sistema de mixar times, interpretantando os níveis da GamersClub
+3. Adicionar Comando para montar chaves de campeonato automaticamente
+4. Colocar a opção de MusicBot

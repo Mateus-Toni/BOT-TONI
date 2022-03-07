@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands, tasks
 from dotenv import load_dotenv
 import os
+import youtube_dl
 import dao
 
 intents = discord.Intents.default()
@@ -126,6 +127,7 @@ async def schedule(ctx):
               print('Não temos jogos marcados para esta aberta')
   else:
       print('sem agendamentos')
+
 @tasks.loop(hours=6)
 async def game_today():
   import datetime
@@ -134,7 +136,7 @@ async def game_today():
   today = datetime.datetime.now()
   if schedule := dao.return_schedule():
     for dictionary in schedule:
-        data = datetime.datetime.strptime(dictionary["data_inicio"], "%Y/%m/%d")
+        data = datetime.datetime.strftime(dictionary["data_inicio"], "%Y/%m/%d")
         if data == today:
             c+=1
             games.append(dictionary)
@@ -163,7 +165,71 @@ async def mira(ctx):
   for value in miras.values():
     for player, crosshair in value.items():
       await ctx.send(f"{player} -> {crosshair}")
- 
+
+
+#musica
+@bot.command("play")
+async def play(ctx, url: str):
+    song_there = os.path.isfile("song.mp3")
+    try:
+        if song_there:
+            os.remove("song.mp3")
+    except PermissionError:
+        await ctx.send("Wait for the current playing music to end or use the 'stop' command")
+        return
+
+    voiceChannel = discord.utils.get(ctx.guild.voice_channels, name='Geral')
+    await voiceChannel.connect()
+    voice = discord.utils.get(bot.voice_bots, guild=ctx.guild)
+
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '192',
+        }],
+    }
+    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([url])
+    for file in os.listdir("./"):
+        if file.endswith(".mp3"):
+            os.rename(file, "song.mp3")
+    voice.play(discord.FFmpegPCMAudio("song.mp3"))
+
+
+@bot.command("sair")
+async def leave(ctx):
+    voice = discord.utils.get(bot.voice_bots, guild=ctx.guild)
+    if voice.is_connected():
+        await voice.disconnect()
+    else:
+        await ctx.send("The bot is not connected to a voice channel.")
+
+
+@bot.command("pause")
+async def pause(ctx):
+    voice = discord.utils.get(bot.voice_bots, guild=ctx.guild)
+    if voice.is_playing():
+        voice.pause()
+    else:
+        await ctx.send("Currently no audio is playing.")
+
+
+@bot.command("resume")
+async def resume(ctx):
+    voice = discord.utils.get(bot.voice_bots, guild=ctx.guild)
+    if voice.is_paused():
+        voice.resume()
+    else:
+        await ctx.send("The audio is not paused.")
+
+
+@bot.command("stop")
+async def stop(ctx):
+    voice = discord.utils.get(bot.voice_bots, guild=ctx.guild)
+    voice.stop()
+
 
 if __name__ == "__main__":
     load_dotenv()

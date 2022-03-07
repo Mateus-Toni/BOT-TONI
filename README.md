@@ -27,6 +27,22 @@ https://discord.gg/322nMfzv
   <h3>!criador:</h3>
   <p>Envia no privado uma mensagem com os links de contato do criador, no caso, eu</p>
  </li>
+ <li>
+    <h3>!play</h3>
+    <p>O bot começa a tocar uma música, basta mandar a url do youtube</p>
+ </li>
+  <li>
+    <h3>!pause</h3>
+    <p>pausa a música</p>
+ </li>
+  <li>
+    <h3>!resume</h3>
+    <p>Continua a tocar a musica de onde parou</p>
+ </li>
+  <li>
+    <h3>!sair</h3>
+    <p>O bot sai do canal</p>
+ </li>
 </ul>
   
 <hr>
